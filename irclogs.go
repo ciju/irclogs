@@ -84,7 +84,7 @@ func main() {
 
 	os.MkdirAll(p, 0700)
 
-	// go logIRCMessages(p, *channel, quit)
+	go logIRCMessages(p, *channel, quit)
 	go serveAssets("./assets")
 	go serveLogs(p, *page_size, quit)
 

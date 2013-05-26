@@ -1,32 +1,25 @@
-# _renderItem = (data) ->
-#     "<p>Title :" + data.title + "</p>"
+localTime = (tstr) ->
+    moment.utc(tstr, "YY-MM-DD H:m:s").local()
 
-# $('#content').infinitescroll {
-# 		navSelector  	: "a#next:last"
-# 		nextSelector 	: "a#next:last"
-# 		itemSelector 	: "#content p"
-# 		debug		 	: true
-# 		dataType	 	: 'json'
-# 		appendCallback	: false
-#     }, ( response ) ->
-#         jsonData = response.results
-#         $theCntr = $("#content");
-#         newElements = "";
-#         for d in jsonData
-#             item = $ _renderItem d
-#             $theCntr.append item
+duration = (tstr) ->
+    localTime(tstr).fromNow()
 
+time = (tstr) ->
+    localTime(tstr).format "MMM D, hh:m A"
 
-# LOGS = "http://#{window.location.hostname}:8004"
-
-timeify = (tstr) ->
-    moment.utc(tstr, "YY-MM-DD H:m:s").local().format("MMM D, hh:m A")
+$('#content').on('mouseenter', '.entry', ->
+    $e = $(@).find('.time')
+    $e.html time $e.data 'time'
+).on('mouseleave', '.entry', ->
+    $e = $(@).find('.time')
+    $e.html duration $e.data 'time'
+)
 
 markupify_single = (entry) ->
     entry = $(entry).html().split(" - ")
 
     "<p class='entry'>"+
-    "<span class='time'>#{timeify(entry[0])}</span>" +
+    "<span class='time' data-time='#{entry[0]}'>#{duration(entry[0])}</span>" +
     "<span class='author'>#{entry[1]}:</span>" +
     "<span class='msg'>#{entry[2..]}</span>" + "</p>"
 

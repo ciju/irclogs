@@ -31,6 +31,7 @@ a#next {
     display: inline-block;
     width: 146px;
     text-align: right;
+   float: right;
 }
 
 .author {

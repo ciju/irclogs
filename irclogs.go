@@ -68,12 +68,18 @@ var (
 	page_size = flag.Int("s", 30, "page size, to be served")
 	port      = flag.String("p", "3001", "port to serve assets and logs")
 	channel   = flag.String("c", "#astest", "channel to connect to")
+	help      = flag.Bool("h", false, "Print console options")
 )
 
 func main() {
 	flag.Parse()
 
 	quit := make(chan bool)
+
+	if *help {
+		flag.Usage()
+		os.Exit(0)
+	}
 
 	p, err := filepath.Abs(*root)
 	if err != nil {

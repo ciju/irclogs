@@ -18,20 +18,20 @@ $('#content').on('mouseenter', '.entry', ->
 markupify_single = (entry) ->
     entry = $(entry).html().split(" - ")
 
-    "<p class='entry'>"+
-    "<span class='time' data-time='#{entry[0]}'>#{duration(entry[0])}</span>" +
-    "<span class='author'>#{entry[1]}:</span>" +
-    "<span class='msg'>#{entry[2..]}</span>" + "</p>"
+    "<div class='entry'>"+
+    "<div class='time' data-time='#{entry[0]}'>#{duration(entry[0])}</div>" +
+    "<div class='author'>#{entry[1]}</div>" +
+    "<div class='msg'>#{entry[2..]}</div>" + "</div>"
 
 markupify = (resp) ->
     markupify_single(i) for i in resp
-	
+
 $ ->
     $.get "/logs?page=1", (data) ->
         console.log markupify $(data).find 'p'
         $('#content').append markupify $(data).find 'p'
         console.log('started')
-    	
+
 
         $('#content').infinitescroll {
             navSelector  	: "#next:last"
@@ -52,10 +52,8 @@ $ ->
             $curr_top = $(opts.itemSelector).children().first()
 
             $('#content').prepend markupify resp
-            
+
             prev_height = 0
             $curr_top.parent().prevAll().each -> prev_height += $(@).outerHeight(true);
 
             $("html, body").scrollTop prev_height
-            
-

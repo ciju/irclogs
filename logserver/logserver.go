@@ -5,6 +5,7 @@ package logserver
 import (
 	"bufio"
 	"fmt"
+	"github.com/golang/glog"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -53,13 +54,13 @@ func NewLog(path string) (*Log, error) {
 	var err error
 	var file os.FileInfo
 	if lines, err = readLines(path); err != nil {
-		fmt.Println("cound't read lines for ", path)
+		glog.Error("cound't read lines for ", path)
 	}
 
 	reverse(lines)
 
 	if file, err = os.Stat(path); err != nil {
-		fmt.Println("Coundn't open file for Stat", err)
+		glog.Error("Coundn't open file for Stat", err)
 		return nil, err
 	}
 	return &Log{path: path, Lines: lines, lastModTime: file.ModTime()}, err
@@ -68,7 +69,7 @@ func NewLog(path string) (*Log, error) {
 func (l Log) HasUpdate() bool {
 	file, err := os.Stat(l.path)
 	if err != nil {
-		fmt.Println("Coundn't open file for Stat", err)
+		glog.Error("Coundn't open file for Stat", err)
 		return false
 	}
 	return file.ModTime().After(l.lastModTime)
@@ -77,12 +78,12 @@ func (l Log) HasUpdate() bool {
 func (l *Log) Update() (err error) {
 	var file os.FileInfo
 	if l.Lines, err = readLines(l.path); err != nil {
-		fmt.Println("Couldn't open the file for update", err)
+		glog.Error("Couldn't open the file for update", err)
 		return err
 	}
 
 	if file, err = os.Stat(l.path); err != nil {
-		fmt.Println("Coundn't open file for Stat", err)
+		glog.Error("Coundn't open file for Stat", err)
 		return err
 	}
 	l.lastModTime = file.ModTime()
@@ -132,7 +133,7 @@ func (lgs *Logs) Range(start, end int) []string {
 			end -= ln
 		}
 
-		fmt.Println("range", l.Lines[lstart:lend])
+		glog.V(2).Info("range", l.Lines[lstart:lend])
 		lns = append(lns, l.Lines[lstart:lend]...)
 	}
 
@@ -151,7 +152,7 @@ func (a *Logs) String() string {
 func (a *Logs) Update() {
 	fls, err := ioutil.ReadDir(a.root)
 	if err != nil {
-		fmt.Println("readError", err)
+		glog.Error("readError", err)
 	}
 
 	a.Logs = []*Log{}
@@ -168,7 +169,7 @@ func (a *Logs) Update() {
 func NewLogs(root string) (*Logs, error) {
 	fls, err := ioutil.ReadDir(root)
 	if err != nil {
-		fmt.Println("readError", err)
+		glog.Error("readError", err)
 		return nil, err
 	}
 
@@ -191,7 +192,7 @@ func logPages(w http.ResponseWriter, r *http.Request, lgs *Logs, size int) {
 
 	p, err := strconv.Atoi(page)
 	if err != nil {
-		fmt.Println("page param not int", err)
+		glog.Error("page param not int", err)
 		fmt.Fprintf(w, fmt.Sprintln("page param not int", err))
 		return
 	}
@@ -215,18 +216,17 @@ func logPages(w http.ResponseWriter, r *http.Request, lgs *Logs, size int) {
 		p = p + 1
 	}
 	nxt_page := strconv.Itoa(p)
-	fmt.Println("   page: ", page, " next", nxt_page, " - ")
+	glog.V(2).Infof("   page: %s next %s\n", page, nxt_page)
 	fmt.Fprintf(w, "<a id='next' href='/logs?page="+nxt_page+"'>next</a></div>")
 }
 
 func makeHandler(fn func(http.ResponseWriter, *http.Request, *Logs, int), root string, size int) http.HandlerFunc {
 	lgs, err := NewLogs(root)
 	if err != nil {
-		fmt.Println(err)
+		glog.Error(err)
 	}
-	fmt.Println("initializing")
 	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("new request")
+		glog.V(1).Info("new request")
 		fn(w, r, lgs, size)
 	}
 }

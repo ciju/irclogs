@@ -2,12 +2,13 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	irc "github.com/fluffle/goirc/client"
-	"log"
+	"github.com/golang/glog"
 	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"syscall"
 )
 
 import (
@@ -22,19 +23,18 @@ import (
 // the javascript files.
 //
 
-func logIRCMessages(root string, channel string, quit chan bool) {
+func logIRCMessages(root string, channel string) {
 	c := irc.SimpleClient("logbot")
 	c.EnableStateTracking()
 
 	c.AddHandler(irc.CONNECTED, func(conn *irc.Conn, line *irc.Line) {
 		conn.Join(channel)
-		fmt.Println("connecting to ", channel)
+		glog.Infof("connecting to %s\n", channel)
 	})
 
 	c.AddHandler(irc.DISCONNECTED, func(conn *irc.Conn, line *irc.Line) {
-		fmt.Println("disconnecting")
-		logIRCMessages(root, channel, quit)
-		// quit <- true
+		glog.Infoln("disconnecting")
+		logIRCMessages(root, channel)
 	})
 
 	c.AddHandler("PRIVMSG", func(conn *irc.Conn, line *irc.Line) {
@@ -44,13 +44,13 @@ func logIRCMessages(root string, channel string, quit chan bool) {
 		}
 	})
 
-	if err := c.Connect("foonetic.net"); err != nil {
-		fmt.Printf("Connection error: %s\n", err)
+	if err := c.Connect("irc.freenode.net"); err != nil {
+		glog.Error("Connection error: %s\n", err)
 	}
 
 }
 
-func serveLogs(root string, page_size int, quit chan bool) {
+func serveLogs(root string, page_size int) {
 	http.Handle("/logs",
 		http.HandlerFunc(
 			logserver.LogServerHandler(root, page_size)))
@@ -58,7 +58,7 @@ func serveLogs(root string, page_size int, quit chan bool) {
 
 func serveAssets(dir string) {
 	if dir == "" {
-		log.Fatal("No directory given, to serve")
+		glog.Fatal("No directory given, to serve")
 	}
 
 	http.Handle("/", http.FileServer(http.Dir(dir)))
@@ -73,9 +73,9 @@ var (
 )
 
 func main() {
-	flag.Parse()
+	glog.Infoln("START. Use 'logbot -h' for command line options.")
 
-	quit := make(chan bool)
+	flag.Parse()
 
 	if *help {
 		flag.Usage()
@@ -84,21 +84,24 @@ func main() {
 
 	p, err := filepath.Abs(*root)
 	if err != nil {
-		log.Fatal(err)
+		glog.Fatal(err)
 	}
 
-	fmt.Printf("Saving and serving logs to/from %s\n", p)
+	glog.Infof("Saving and serving logs to/from %s\n", p)
 
 	os.MkdirAll(p, 0700)
 
-	go logIRCMessages(p, *channel, quit)
+	go logIRCMessages(p, *channel)
 	go serveAssets("./assets")
-	go serveLogs(p, *page_size, quit)
+	go serveLogs(p, *page_size)
 
-	fmt.Println("Serving at port", *port)
+	glog.Infof("Serving at port %s\n", *port)
 	if err := http.ListenAndServe(":"+*port, nil); err != nil {
-		log.Fatal("error", err)
+		glog.Fatal("error", err)
 	}
 
+	quit := make(chan os.Signal)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGKILL, syscall.SIGTERM)
 	<-quit
+	glog.Infoln("Quit.")
 }

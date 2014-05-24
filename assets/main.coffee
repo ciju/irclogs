@@ -1,5 +1,5 @@
 localTime = (tstr) ->
-    moment.utc(tstr, "YY-MM-DD H:m:s").local()
+    moment.utc(tstr, "YY-MM-DD H:m:s")?.local()
 
 duration = (tstr) ->
     localTime(tstr).fromNow()

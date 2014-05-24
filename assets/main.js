@@ -3,7 +3,9 @@
   var duration, localTime, markupify, markupify_single, time;
 
   localTime = function(tstr) {
-    return moment.utc(tstr, "YY-MM-DD H:m:s").local();
+    var _ref;
+
+    return (_ref = moment.utc(tstr, "YY-MM-DD H:m:s")) != null ? _ref.local() : void 0;
   };
 
   duration = function(tstr) {

@@ -29,15 +29,15 @@ markupify = (resp) ->
 
 $ ->
     $.get "/logs?page=1", (data) ->
-        console.log markupify $(data).find 'p'
-        $('#content').append markupify $(data).find 'p'
+        console.log markupify $(data).find '.entry'
+        $('#content').append markupify $(data).find '.entry'
         console.log('started')
 
 
         $('#content').infinitescroll {
             navSelector  	: "#next:last"
             nextSelector 	: "a#next:last"
-            itemSelector 	: "#content p"
+            itemSelector 	: "#content .entry"
             appendCallback  : false
             debug		 	: true
             dataType	 	: 'html'
@@ -50,7 +50,7 @@ $ ->
         }, (resp, opts) ->
             console.log resp
 
-            $curr_top = $(opts.itemSelector).children().first()
+            $curr_top = $(opts.itemSelector).first()
 
             $('#content').prepend markupify resp
 

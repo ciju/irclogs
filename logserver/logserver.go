@@ -209,7 +209,7 @@ func logPages(w http.ResponseWriter, r *http.Request, lgs *Logs, size int) {
 	rng := lgs.Range(start, end)
 	reverse(rng)
 	for _, c := range rng {
-		fmt.Fprint(w, "<p>"+c+"</p>")
+		fmt.Fprint(w, "<div class='entry'>"+c+"</div>")
 	}
 	if len(rng) == size {
 		p = p + 1

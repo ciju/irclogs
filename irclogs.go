@@ -33,7 +33,8 @@ func logIRCMessages(root string, channel string, quit chan bool) {
 
 	c.AddHandler(irc.DISCONNECTED, func(conn *irc.Conn, line *irc.Line) {
 		fmt.Println("disconnecting")
-		quit <- true
+		logIRCMessages(root, channel, quit)
+		// quit <- true
 	})
 
 	c.AddHandler("PRIVMSG", func(conn *irc.Conn, line *irc.Line) {

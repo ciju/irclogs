@@ -23,18 +23,18 @@ import (
 // the javascript files.
 //
 
-func logIRCMessages(root string, channel string) {
+func logIRCMessages(root string, channel string, server string) {
 	c := irc.SimpleClient("logbot")
 	c.EnableStateTracking()
 
 	c.AddHandler(irc.CONNECTED, func(conn *irc.Conn, line *irc.Line) {
 		conn.Join(channel)
-		glog.Infof("connecting to %s\n", channel)
+		glog.Infof("connecting to %s %s\n", server, channel)
 	})
 
 	c.AddHandler(irc.DISCONNECTED, func(conn *irc.Conn, line *irc.Line) {
 		glog.Infoln("disconnecting")
-		logIRCMessages(root, channel)
+		logIRCMessages(root, channel, server)
 	})
 
 	c.AddHandler("PRIVMSG", func(conn *irc.Conn, line *irc.Line) {
@@ -44,8 +44,8 @@ func logIRCMessages(root string, channel string) {
 		}
 	})
 
-	if err := c.Connect("irc.freenode.net"); err != nil {
-		glog.Error("Connection error: %s\n", err)
+	if err := c.Connect(server); err != nil {
+		glog.Errorf("Connection error: %s\n", err)
 	}
 
 }
@@ -66,7 +66,8 @@ func serveAssets(dir string) {
 
 var (
 	root      = flag.String("l", ".", "log directory, also to serve")
-	page_size = flag.Int("s", 30, "page size, to be served")
+	page_size = flag.Int("n", 30, "page size, to be served")
+	server    = flag.String("s", "chat.freenode.net", "Server to connect to")
 	port      = flag.String("p", "3001", "port to serve assets and logs")
 	channel   = flag.String("c", "#astest", "channel to connect to")
 	help      = flag.Bool("h", false, "Print console options")
@@ -91,7 +92,7 @@ func main() {
 
 	os.MkdirAll(p, 0700)
 
-	go logIRCMessages(p, *channel)
+	go logIRCMessages(p, *channel, *server)
 	go serveAssets("./assets")
 	go serveLogs(p, *page_size)
 

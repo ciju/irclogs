@@ -72,7 +72,7 @@
         $curr_top = $(opts.itemSelector).first();
         $('#content').prepend(markupify(resp));
         prev_height = 0;
-        $curr_top.parent().prevAll().each(function() {
+        $curr_top.prevAll().each(function() {
           return prev_height += $(this).outerHeight(true);
         });
         return $("html, body").scrollTop(prev_height);

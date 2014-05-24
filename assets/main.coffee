@@ -55,6 +55,6 @@ $ ->
             $('#content').prepend markupify resp
 
             prev_height = 0
-            $curr_top.parent().prevAll().each -> prev_height += $(@).outerHeight(true);
+            $curr_top.prevAll().each -> prev_height += $(@).outerHeight(true);
 
             $("html, body").scrollTop prev_height

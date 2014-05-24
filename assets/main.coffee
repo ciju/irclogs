@@ -17,6 +17,7 @@ $('#content').on('mouseenter', '.entry', ->
 
 markupify_single = (entry) ->
     entry = $(entry).html().split(" - ")
+    return "" if !entry[0].length
 
     "<div class='entry'>"+
     "<div class='time' data-time='#{entry[0]}'>#{duration(entry[0])}</div>" +

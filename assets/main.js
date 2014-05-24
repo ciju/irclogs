@@ -28,6 +28,9 @@
 
   markupify_single = function(entry) {
     entry = $(entry).html().split(" - ");
+    if (!entry[0].length) {
+      return "";
+    }
     return "<div class='entry'>" + ("<div class='time' data-time='" + entry[0] + "'>" + (duration(entry[0])) + "</div>") + ("<div class='author'>" + entry[1] + "</div>") + ("<div class='msg'>" + entry.slice(2) + "</div>") + "</div>";
   };
 

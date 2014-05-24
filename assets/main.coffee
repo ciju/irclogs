@@ -15,14 +15,18 @@ $('#content').on('mouseenter', '.entry', ->
     $e.html duration $e.data 'time'
 )
 
+process_msg = (msg) ->
+    msg.replace /(http[s]?:\/\/[^ ]*)/, '<a href="$1">$1</a>'
+
 markupify_single = (entry) ->
     entry = $(entry).html().split(" - ")
     return "" if !entry[0].length
 
+    msg = process_msg(msg) for msg in entry[2..]
     "<div class='entry'>"+
     "<div class='time' data-time='#{entry[0]}'>#{duration(entry[0])}</div>" +
     "<div class='author'>#{entry[1]}</div>" +
-    "<div class='msg'>#{entry[2..]}</div>" + "</div>"
+    "<div class='msg'>#{msg}</div>" + "</div>"
 
 markupify = (resp) ->
     markupify_single(i) for i in resp
